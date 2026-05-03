@@ -42,7 +42,7 @@ export function DataTableViewOptions<TData>({ table }: { table: Table<TData> }) 
                 ? "Email"
                 : column.id === "phone"
                 ? "Phone Number"
-                : column.id === "submittedAt"
+                : column.id === "createdAt"
                 ? "Registration Date"
                 : column.id}
             </DropdownMenuCheckboxItem>

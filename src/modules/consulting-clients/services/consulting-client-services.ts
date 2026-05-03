@@ -13,23 +13,41 @@ import { db } from "@/lib/firebase/client"
 import { registerUserMockData } from "./register-user-mock-data"
 import type { RegisterUser } from "./types/register-user-types"
 
+function parseTimestamp(value: unknown): string {
+  if (typeof value === "string") return value
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>
+    if ("seconds" in obj && "nanoseconds" in obj) {
+      return new Date((obj.seconds as number) * 1000).toISOString()
+    }
+    if (typeof obj.toDate === "function") {
+      return (obj.toDate as () => Date).call(null).toISOString()
+    }
+  }
+  if (value) return String(value)
+  return new Date().toISOString()
+}
+
+function parseRegistrationDate(item: Record<string, unknown>): string {
+  const createdAt = item.createdAt as unknown
+  const submittedAt = item.submittedAt as unknown
+  if (createdAt !== undefined && createdAt !== null) {
+    return parseTimestamp(createdAt)
+  }
+  if (submittedAt !== undefined && submittedAt !== null) {
+    return parseTimestamp(submittedAt)
+  }
+  return new Date().toISOString()
+}
+
 export async function getRegisterUsers(): Promise<RegisterUser[]> {
   const data = await getFirestoreCollection<RegisterUser>("register_users", registerUserMockData)
   return data.map((item) => {
-    const submittedAt = item.submittedAt as unknown as string | { toDate?: () => Date } | null | undefined
-    let dateStr: string
-
-    if (typeof submittedAt === "string") {
-      dateStr = submittedAt
-    } else if (submittedAt && typeof submittedAt === "object" && "toDate" in submittedAt) {
-      dateStr = (submittedAt as { toDate: () => Date }).toDate().toISOString()
-    } else if (submittedAt) {
-      dateStr = String(submittedAt)
-    } else {
-      dateStr = new Date().toISOString()
+    const raw = item as unknown as Record<string, unknown>
+    return {
+      ...item,
+      createdAt: parseRegistrationDate(raw),
     }
-
-    return { ...item, submittedAt: dateStr } as RegisterUser
   })
 }
 
@@ -53,6 +71,7 @@ export async function createRegisterUser(
       email: user.email,
       phone: user.phone,
       content: user.content,
+      createdAt: serverTimestamp(),
       submittedAt: serverTimestamp(),
     })
     return { id: generateId(), success: true }
@@ -116,7 +135,7 @@ export function getConsultingStats(users: RegisterUser[]): ConsultingStats {
   const todayStr = now.toISOString().split("T")[0]
 
   const today = users.filter((u) => {
-    const d = new Date(u.submittedAt)
+    const d = new Date(u.createdAt)
     return d.toISOString().split("T")[0] === todayStr
   }).length
 

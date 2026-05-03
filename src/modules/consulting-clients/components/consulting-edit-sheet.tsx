@@ -59,7 +59,7 @@ export function ConsultingEditSheet({
 
     try {
       const validated = editFormSchema.parse(formData)
-      const result = await updateRegisterUser({ ...validated, id: user.id, submittedAt: user.submittedAt })
+      const result = await updateRegisterUser({ ...validated, id: user.id, createdAt: user.createdAt })
 
       if (result.success) {
         toast.success("Cập nhật thành công", {

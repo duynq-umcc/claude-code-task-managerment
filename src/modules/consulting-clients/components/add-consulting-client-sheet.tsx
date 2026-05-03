@@ -60,7 +60,7 @@ export function AddConsultingClientSheet({
 
       const result = await createRegisterUser({
         ...validated,
-        submittedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       })
 
       if (result.success) {

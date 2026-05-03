@@ -67,13 +67,13 @@ export const columns: ColumnDef<RegisterUser>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "submittedAt",
+    accessorKey: "createdAt",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Registration Date" />
     ),
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        {format(new Date(row.getValue("submittedAt")), "dd/MM/yyyy HH:mm", {
+        {format(new Date(row.getValue("createdAt")), "dd/MM/yyyy HH:mm", {
           locale: vi,
         })}
       </span>

@@ -78,7 +78,7 @@ export function ConsultingDetailSheet({ user, trigger }: ConsultingDetailSheetPr
           <DetailRow
             icon={Calendar}
             label="Ngày đăng ký"
-            value={format(new Date(user.submittedAt), "dd/MM/yyyy — HH:mm", {
+            value={format(new Date(user.createdAt), "dd/MM/yyyy — HH:mm", {
               locale: vi,
             })}
           />

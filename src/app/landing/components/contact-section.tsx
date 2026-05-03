@@ -62,6 +62,7 @@ export function ContactSection() {
     try {
       await addDoc(collection(db, "register_users"), {
         ...values,
+        createdAt: serverTimestamp(),
         submittedAt: serverTimestamp(),
       })
       toast.success("Đăng ký thành công!", {
