@@ -3,8 +3,11 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import { Eye } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 import type { RegisterUser } from "@/modules/consulting-clients/services/types/register-user-types"
+import { ConsultingDetailSheet } from "./consulting-detail-sheet"
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"
 
@@ -82,6 +85,14 @@ export const columns: ColumnDef<RegisterUser>[] = [
     sortingFn: "datetime",
   },
   {
+    id: "detail",
+    header: "",
+    cell: ({ row }) => <RowDetailButton row={row} />,
+    enableSorting: false,
+    enableHiding: false,
+    size: 50,
+  },
+  {
     id: "actions",
     header: "",
     cell: ({ row }) => <DataTableRowActions row={row} />,
@@ -89,3 +100,18 @@ export const columns: ColumnDef<RegisterUser>[] = [
     enableHiding: false,
   },
 ]
+
+function RowDetailButton({ row }: { row: { original: RegisterUser } }) {
+  return (
+    <ConsultingDetailSheet user={row.original}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="flex h-8 w-8 p-0 cursor-pointer"
+        title="Xem chi tiết"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+    </ConsultingDetailSheet>
+  )
+}

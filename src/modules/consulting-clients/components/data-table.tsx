@@ -37,6 +37,7 @@ interface DataTableProps<TData, TValue> {
   onUserCreated?: () => Promise<void>
   onUserUpdated?: () => Promise<void>
   onUserDeleted?: () => Promise<void>
+  onRowClick?: (user: TData) => void
 }
 
 export function DataTable<TData, TValue>({
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   onUserCreated,
   onUserUpdated,
   onUserDeleted,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -106,11 +108,18 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer"
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className="whitespace-nowrap"
+                      onClick={
+                        cell.column.id === "actions" || cell.column.id === "detail"
+                          ? (e) => e.stopPropagation()
+                          : undefined
+                      }
                     >
                       {cell.column.id === "actions" ? (
                         <DataTableRowActions

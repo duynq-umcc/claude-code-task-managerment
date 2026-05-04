@@ -20,19 +20,16 @@ import type { RegisterUser } from "@/modules/consulting-clients/services/types/r
 interface ConsultingDetailSheetProps {
   user: RegisterUser
   trigger?: React.ReactNode
+  children?: React.ReactNode
 }
 
-export function ConsultingDetailSheet({ user, trigger }: ConsultingDetailSheetProps) {
+export function ConsultingDetailSheet({ user, trigger, children }: ConsultingDetailSheetProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      {trigger ? (
-        <SheetTitle className="sr-only">Chi tiết khách hàng tư vấn</SheetTitle>
-      ) : (
-        <SheetTitle className="sr-only">Chi tiết khách hàng tư vấn</SheetTitle>
-      )}
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetTitle className="sr-only">Chi tiết khách hàng tư vấn</SheetTitle>
+      <SheetTrigger asChild>{trigger ?? children}</SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center gap-2">
