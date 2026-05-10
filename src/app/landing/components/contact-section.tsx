@@ -69,6 +69,26 @@ export function ContactSection() {
         description: "Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.",
       })
       form.reset()
+
+      // Trigger auto-reply email (non-blocking)
+      fetch("/api/email/auto-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.skipped) {
+            // auto-reply is off — no need to notify user
+          } else if (data.success) {
+            // email sent silently alongside registration success toast
+          } else {
+            console.warn("[auto-reply] Failed:", data.error)
+          }
+        })
+        .catch((err) => {
+          console.error("[auto-reply] Fetch error:", err)
+        })
     } catch (error) {
       toast.error("Đăng ký thất bại", {
         description: "Đã xảy ra lỗi khi gửi thông tin. Vui lòng thử lại.",

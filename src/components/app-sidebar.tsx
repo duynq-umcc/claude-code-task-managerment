@@ -100,6 +100,11 @@ const data = {
           url: "/consulting-clients",
           icon: Headphones,
         },
+        {
+          title: "Email",
+          url: "/consulting-clients/email",
+          icon: Mail,
+        },
       ],
     },
     {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { sendEmail, sendEmailWithTemplate } from "@/lib/email"
+import { logEmailServer } from "@/modules/email/services/email-log-service"
+import { logEmailApiCall } from "@/modules/email/services/email-api-log-service"
 
 const SendEmailSchema = z.object({
   to: z.string().min(1, "Người nhận không được để trống").or(z.array(z.string().min(1)).min(1)),
@@ -14,24 +16,59 @@ const SendEmailSchema = z.object({
   replyTo: z.string().optional(),
   cc: z.string().optional(),
   bcc: z.string().optional(),
+  fullName: z.string().optional(),
 })
 
-export async function POST(request: NextRequest) {
+async function doLog(
+  to: string,
+  subject: string,
+  type: "manual" | "auto_reply",
+  status: "sent" | "failed",
+  fullName?: string,
+  error?: string
+) {
   try {
-    const body = await request.json()
-    const parsed = SendEmailSchema.safeParse(body)
+    await logEmailServer({ to, fullName, subject, type, status, error })
+  } catch (err) {
+    console.error("[logEmailServer] Failed:", err)
+  }
+}
+
+async function doApiLog(payload: Parameters<typeof logEmailApiCall>[0]) {
+  try {
+    await logEmailApiCall(payload)
+  } catch (err) {
+    console.error("[logEmailApiCall] Failed:", err)
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const rawBody = await request.clone().json()
+
+  try {
+    const parsed = SendEmailSchema.safeParse(rawBody)
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: parsed.error.issues.map((e) => e.message).join("; "),
-        },
-        { status: 400 }
-      )
+      const body = {
+        success: false,
+        error: parsed.error.issues.map((e) => e.message).join("; "),
+      }
+      const response = NextResponse.json(body, { status: 400 })
+      doApiLog({
+        endpoint: "/api/email/send",
+        method: "POST",
+        statusCode: 400,
+        requestBody: rawBody,
+        responseBody: body,
+      })
+      return response
     }
 
     const data = parsed.data
+    const toAddresses = Array.isArray(data.to)
+      ? data.to
+      : data.to.split(",").map((s) => s.trim())
+    const toString = toAddresses.join(", ")
 
     let result
     if (data.templateTitle) {
@@ -52,10 +89,16 @@ export async function POST(request: NextRequest) {
       )
     } else {
       if (!data.html && !data.text) {
-        return NextResponse.json(
-          { success: false, error: "Cần cung cấp nội dung email (html hoặc text)." },
-          { status: 400 }
-        )
+        const body = { success: false, error: "Cần cung cấp nội dung email (html hoặc text)." }
+        const response = NextResponse.json(body, { status: 400 })
+        doApiLog({
+          endpoint: "/api/email/send",
+          method: "POST",
+          statusCode: 400,
+          requestBody: rawBody,
+          responseBody: body,
+        })
+        return response
       }
       result = await sendEmail({
         to: data.to as string | string[],
@@ -69,12 +112,36 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(result, { status: result.success ? 200 : 500 })
+    await doLog(
+      toString,
+      data.subject,
+      "manual",
+      result.success ? "sent" : "failed",
+      data.fullName,
+      result.error
+    )
+
+    const status = result.success ? 200 : 500
+    const response = NextResponse.json(result, { status })
+    doApiLog({
+      endpoint: "/api/email/send",
+      method: "POST",
+      statusCode: status,
+      requestBody: rawBody,
+      responseBody: result as unknown as Record<string, unknown>,
+    })
+    return response
   } catch (err) {
     const error = err as Error
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    )
+    const body = { success: false, error: error.message }
+    const response = NextResponse.json(body, { status: 500 })
+    doApiLog({
+      endpoint: "/api/email/send",
+      method: "POST",
+      statusCode: 500,
+      requestBody: rawBody,
+      error: error.message,
+    })
+    return response
   }
 }
