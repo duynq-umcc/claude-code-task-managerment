@@ -7,6 +7,15 @@ const TestSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
 })
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
         phone: "0901234567",
         content: "Đây là email test auto-reply.",
       }
-      return map[key] ?? `{{${key}}}`
+      return escapeHtml(map[key] ?? `{{${key}}}`)
     })
 
     const result = await sendEmailWithTemplate(

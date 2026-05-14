@@ -9,7 +9,9 @@
       "Bash(curl -s http://localhost:3000/consulting-clients/email -o /dev/null -w \"%{http_code}\")",
       "Bash(curl -s -X POST http://localhost:3000/api/email/auto-reply -H 'Content-Type: application/json' -d '{\"fullName\":\"Nguyễn Văn Test\",\"email\":\"test@example.com\",\"phone\":\"0909123456\",\"content\":\"Tôi cần tư vấn về dịch vụ\"}')",
       "Bash(curl -s -X POST http://localhost:3000/api/email/send -H 'Content-Type: application/json' -d '{\"to\":\"test@example.com\",\"subject\":\"Test log email\",\"html\":\"<p>Test</p>\"}')",
-      "Bash(curl -s -X POST http://localhost:3000/api/email/send -H 'Content-Type: application/json' -d '{\"to\":\"test@example.com\",\"subject\":\"Test log 2\",\"html\":\"<p>Test</p>\"}')"
+      "Bash(curl -s -X POST http://localhost:3000/api/email/send -H 'Content-Type: application/json' -d '{\"to\":\"test@example.com\",\"subject\":\"Test log 2\",\"html\":\"<p>Test</p>\"}')",
+      "Bash(ls .vercel/)",
+      "Bash(cat .vercel/project.json)"
     ]
   }
 }

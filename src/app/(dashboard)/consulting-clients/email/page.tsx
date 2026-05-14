@@ -6,7 +6,8 @@ import { AutoReplyConfigPanel } from "@/modules/email/components/auto-reply-conf
 import { EmailComposePanel } from "@/modules/email/components/email-compose-panel"
 import { EmailHistoryPanel } from "@/modules/email/components/email-history-panel"
 import { EmailApiHistoryPanel } from "@/modules/email/components/email-api-history-panel"
-import { Mail, Settings2, History, Terminal } from "lucide-react"
+import { AutoReplyFlowPanel } from "@/modules/email/components/auto-reply-flow-panel"
+import { Mail, Settings2, History, Terminal, Workflow } from "lucide-react"
 
 export default function EmailPage() {
   const [activeTab, setActiveTab] = useState("compose")
@@ -31,6 +32,10 @@ export default function EmailPage() {
               <Settings2 className="h-4 w-4" />
               Cấu hình Auto-reply
             </TabsTrigger>
+            <TabsTrigger value="flow" className="gap-1.5">
+              <Workflow className="h-4 w-4" />
+              Luồng Auto-reply
+            </TabsTrigger>
             <TabsTrigger value="history" className="gap-1.5">
               <History className="h-4 w-4" />
               Lịch sử gửi email
@@ -47,6 +52,10 @@ export default function EmailPage() {
 
           <TabsContent value="auto-reply">
             <AutoReplyConfigPanel />
+          </TabsContent>
+
+          <TabsContent value="flow">
+            <AutoReplyFlowPanel />
           </TabsContent>
 
           <TabsContent value="history">

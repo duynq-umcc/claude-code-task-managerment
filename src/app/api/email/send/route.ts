@@ -30,7 +30,7 @@ async function doLog(
   try {
     await logEmailServer({ to, fullName, subject, type, status, error })
   } catch (err) {
-    console.error("[logEmailServer] Failed:", err)
+    console.error("[logEmailServer] Failed to write email log to Firestore:", err)
   }
 }
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    await doLog(
+    doLog(
       toString,
       data.subject,
       "manual",

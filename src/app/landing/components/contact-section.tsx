@@ -71,7 +71,8 @@ export function ContactSection() {
       form.reset()
 
       // Trigger auto-reply email (non-blocking)
-      fetch("/api/email/auto-reply", {
+      const apiBase = process.env.NEXT_PUBLIC_APP_URL ?? ""
+      fetch(`${apiBase}/api/email/auto-reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -79,15 +80,23 @@ export function ContactSection() {
         .then((r) => r.json())
         .then((data) => {
           if (data.skipped) {
-            // auto-reply is off — no need to notify user
+            // auto-reply is off — silent, no user-facing notification
           } else if (data.success) {
-            // email sent silently alongside registration success toast
+            toast.success("Email phản hồi tự động đã được gửi!", {
+              description: "Vui lòng kiểm tra hộp thư để xem nội dung phản hồi.",
+            })
           } else {
-            console.warn("[auto-reply] Failed:", data.error)
+            toast.error("Gửi email phản hồi thất bại", {
+              description: data.error || "Đã xảy ra lỗi khi gửi email phản hồi tự động.",
+            })
           }
         })
         .catch((err) => {
+          // Network error or API unreachable — user should know
           console.error("[auto-reply] Fetch error:", err)
+          toast.error("Không thể kết nối API phản hồi tự động", {
+            description: "Vui lòng kiểm tra lại sau hoặc liên hệ hỗ trợ.",
+          })
         })
     } catch (error) {
       toast.error("Đăng ký thất bại", {
